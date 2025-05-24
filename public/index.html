@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,7 +16,12 @@
         <input type="number" id="room-num" name="room" placeholder="Enter room name" required autocomplete="off">
         <button type="submit">Enter a Room</button>
     </form>
-
+    <div class="go-home" style="display: none;">
+        <div class="go-home-text">Play Again</div>
+    </div>    
+    <div class="info">
+        <div class="class-text"></div>
+    </div>
     <div class="game-board">
         <div class="rows" id="first-row">
             <div class="cells" id="0"></div>
@@ -28,7 +36,7 @@
         <div class="rows" id="third-row">
             <div class="cells" id="6"></div>
             <div class="cells" id="7"></div>
-            <div class="cells" id="9"></div>
+            <div class="cells" id="8"></div>
         </div>
     </div>
 

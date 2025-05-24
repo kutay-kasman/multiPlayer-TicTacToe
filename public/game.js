@@ -2,11 +2,16 @@ const socket = io()
 const numRoom = document.getElementById('room-num')
 const roomForm = document.getElementById('room-form')
 const gameBoard = document.querySelector('.game-board')
+const infoText = document.querySelector('.info')
 
 let myRole = ''
 let currentRole = ''
 let roomId = null
 let gameStarted = false
+
+const playAgainBtn = document.querySelector('.go-home');
+playAgainBtn.style.display = 'none'; // Hide initially
+let restartConfirm = false; // Local flag
 
 // Initialize game state
 let board = Array(9).fill('')
@@ -31,21 +36,28 @@ roomForm.addEventListener('submit', (e) => {
             return
         }
         roomForm.style.display = 'none'
-        gameBoard.style.display = 'grid'
+        gameBoard.style.display = 'flex'
     })
 })
 
 socket.on('playersRole', ({role}) => {
     myRole = role
-    console.log('You are ' + myRole)
+    if(myRole == 'X') {
+        infoText.style.display = 'flex'
+        infoText.textContent = `You are X wait for the opponent`
+    }
+    else if(myRole == 'O') {
+        infoText.style.display = 'flex'
+        infoText.textContent = `You are O`
+    }
 })
 
 socket.on('startGame', ({firstTurn}) => {
     gameStarted = true
     currentRole = firstTurn
-    console.log(`Game started! First turn is ${currentRole}`)
+    infoText.textContent =`You are O and the first turn is ${currentRole}`
     if (currentRole === myRole) {
-        console.log('Make your first move')
+        infoText.textContent =`Make your first move`
     }
 })
 
@@ -66,11 +78,12 @@ socket.on('playerDisconnected', () => {
 socket.on('result', winner => {
     gameStarted = false
     if (winner === 'draw') {
-        alert('Game is a draw!')
+        infoText.textContent =`Game is a draw!`
     } else {
-        alert('The winner is ' + winner)
+        infoText.textContent =`The winner is ${winner}`
     }
-    resetGame()
+    playAgainBtn.style.display = 'flex'
+
 })
 
 const checkWinner = (board) => {
@@ -92,16 +105,27 @@ const checkWinner = (board) => {
         return
     }
 }
-
-const resetGame = () => {
+const restartGame = () => {
     board = Array(9).fill('')
     cells.forEach(cell => {
         cell.textContent = ''
     })
-    gameBoard.style.display = 'none'
-    roomForm.style.display = 'block'
-    numRoom.value = ''
+    gameStarted = true
+    infoText.textContent = (currentRole === myRole) 
+        ? 'Your turn!' 
+        : 'Waiting for opponent...'
 }
+
+socket.on('restartGame', ({firstTurn}) => {
+    restartGame(); // Clear board, reset infoText
+    currentRole = firstTurn;
+    gameStarted = true;
+
+    infoText.textContent = (currentRole === myRole) 
+        ? 'Your turn!' 
+        : 'Waiting for opponent...';
+});
+
 
 // Cell click handler
 cells.forEach(cell => {
@@ -117,8 +141,20 @@ cells.forEach(cell => {
         
         socket.emit('makeMove', { roomId, cellId, move: myRole })
         checkWinner(board)
+        if(myRole === 'X') {
+            infoText.textContent = 'X'
+        }
+        else if(myRole === 'O') {
+            infoText.textContent = 'O'
+        }
 
         currentRole = myRole === 'X' ? 'O' : 'X'
     })
 })
 
+
+playAgainBtn.addEventListener('click', () => {
+    playAgainBtn.style.display = 'none'; // Hide again
+    restartConfirm = true;
+    socket.emit('restartRequest', roomId);
+});

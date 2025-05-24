@@ -12,7 +12,7 @@ const publicDirPath = path.join(__dirname, "../public")
 app.use(express.static(publicDirPath))
 app.use(express.json());
 
-// Store room information
+// room information
 const rooms = new Map()
 
 io.on("connection", (socket) => {
@@ -23,7 +23,9 @@ io.on("connection", (socket) => {
         if (!rooms.has(roomId)) {
             rooms.set(roomId, {
                 players: [],
-                gameStarted: false
+                gameStarted: false,
+                restartVotes: new Set(),
+                lastStarter: 'O'
             })
         }
 
@@ -35,13 +37,12 @@ io.on("connection", (socket) => {
             return
         }
 
-        // Check if game has already started
         if (room.gameStarted) {
             if (callback) callback('Game has already started')
             return
         }
 
-        // Assign role based on room state
+        // assign role 
         const role = room.players.length === 0 ? 'X' : 'O'
         room.players.push({ socketId: socket.id, role })
         
@@ -49,7 +50,7 @@ io.on("connection", (socket) => {
         socket.join(roomId)
         socket.emit('playersRole', { role })
 
-        // If room is full, start the game
+        // start the game
         if (room.players.length === 2) {
             room.gameStarted = true
             const firstTurn = 'X'
@@ -66,6 +67,29 @@ io.on("connection", (socket) => {
     socket.on('game-over', (roomId, winner) => {
         io.to(roomId).emit('result', winner)
     })
+    // restart the game
+    socket.on('startGame', ({ firstTurn }) => {
+        currentRole = firstTurn
+        restartGame()
+    })
+    
+    socket.on('restartRequest', (roomId) => {
+        const room = rooms.get(roomId);
+        if (!room) return;
+    
+        room.restartVotes.add(socket.id);
+        
+        // When both players click "Play Again"
+        if (room.restartVotes.size === 2) {
+            room.restartVotes.clear(); // Reset for next time
+            room.gameStarted = true;
+            
+            const nextStarter = room.lastStarter === 'X' ? 'O' : 'X';
+            room.lastStarter = nextStarter;
+            io.to(roomId).emit('restartGame', { firstTurn: nextStarter });
+        }
+    });
+    
 
     // Handle disconnection
     socket.on('disconnect', () => {
