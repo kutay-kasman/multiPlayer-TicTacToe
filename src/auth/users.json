@@ -1,0 +1,17 @@
+{
+  "kutay": {
+    "username": "Kutay",
+    "passwordHash": "$2b$10$gEN88GMTWMSKZirSRboGfu1hhNoCBwO5UeKu/nN6ZddjMgxUrsDMW",
+    "createdAt": "2025-11-20T21:10:49.584Z"
+  },
+  "kasman": {
+    "username": "kasman",
+    "passwordHash": "$2b$10$KE4xTid1GKu20w8sDJdRYuALmGt0aSex.bvn2gRjgaAAqJ9/siSfG",
+    "createdAt": "2025-11-20T21:23:43.075Z"
+  },
+  "yueqi": {
+    "username": "yueqi",
+    "passwordHash": "$2b$10$sRBD0PiCyymWG/t4mcyHKuZo.7Z1aNqIlU4O9tkHFO.2p8Yrx./YC",
+    "createdAt": "2025-11-20T21:33:39.563Z"
+  }
+}

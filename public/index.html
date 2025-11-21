@@ -3,44 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Multiplayer Tic Tac Toe</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Tic Tac Toe Game</h1>
-    <form id="room-form">
-        <label for="room">Room Name</label>
-        <input type="number" id="room-num" name="room" placeholder="Enter room name" required autocomplete="off">
-        <button type="submit">Enter a Room</button>
-    </form>
-    <div class="go-home" style="display: none;">
-        <div class="go-home-text">Play Again</div>
-    </div>    
-    <div class="info">
-        <div class="class-text"></div>
+    <div id="nav-container" class="nav-container">
+        <button id="lobby-nav-btn" class="nav-btn">Lobby</button>
+        <button id="scoreboard-nav-btn" class="nav-btn">Scoreboard</button>
+        <button id="logout-btn" class="nav-btn secondary-btn">Logout</button>
     </div>
-    <div class="game-board">
-        <div class="rows" id="first-row">
-            <div class="cells" id="0"></div>
-            <div class="cells" id="1"></div>
-            <div class="cells" id="2"></div>
+
+    <!-- Authentication View -->
+    <div id="auth-container" class="view">
+        <div class="container">
+            <div class="auth-card">
+                <h1>Welcome</h1>
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab active" data-auth-target="login">Login</button>
+                    <button type="button" class="auth-tab" data-auth-target="register">Register</button>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" placeholder="Your username" required autocomplete="off">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" placeholder="Your password" required autocomplete="off">
+                    <button type="submit">Login</button>
+                </form>
+                <form id="register-form" class="auth-form hidden">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" name="username" placeholder="Choose a username" required autocomplete="off">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" placeholder="Create a password" required autocomplete="off">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" name="confirmPassword" placeholder="Re-enter password" required autocomplete="off">
+                    <button type="submit">Register</button>
+                </form>
+                <div id="auth-message" class="auth-message"></div>
+            </div>
         </div>
-        <div class="rows" id="second-row">
-            <div class="cells" id="3"></div>
-            <div class="cells" id="4"></div>
-            <div class="cells" id="5"></div>
+    </div>
+
+    <!-- Lobby View -->
+    <div id="lobby-container" class="view">
+        <div class="container">
+            <h1>Game Lobby</h1>
+            
+            <div class="lobby-actions">
+                <div class="lobby-card-grid" id="lobby-game-grid">
+                    <div class="game-card game-card--tic is-active" data-game="tic-tac-toe" aria-pressed="true" role="button" tabindex="0">
+                        <span class="game-card__icon" aria-hidden="true">❌</span>
+                        <div class="game-card__content">
+                            <h3 class="game-card__title">Tic Tac Toe</h3>
+                            <p class="game-card__subtitle">Classic 3×3 board duels.</p>
+                            <button type="button" class="game-card__action" data-game="tic-tac-toe">Create Room</button>
+                        </div>
+                    </div>
+                    <div class="game-card game-card--rps" data-game="rock-paper-scissors" aria-pressed="false" role="button" tabindex="0">
+                        <span class="game-card__icon" aria-hidden="true">✂️</span>
+                        <div class="game-card__content">
+                            <h3 class="game-card__title">Rock Paper Scissors</h3>
+                            <p class="game-card__subtitle">Fast hand clash rounds.</p>
+                            <button type="button" class="game-card__action" data-game="rock-paper-scissors">Create Room</button>
+                        </div>
+                    </div>
+                    <div class="game-card game-card--memory" data-game="memory-match" aria-pressed="false" role="button" tabindex="0">
+                        <span class="game-card__icon" aria-hidden="true">🧩</span>
+                        <div class="game-card__content">
+                            <h3 class="game-card__title">Memory Match</h3>
+                            <p class="game-card__subtitle">Flip cards, find pairs.</p>
+                            <button type="button" class="game-card__action" data-game="memory-match">Create Room</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="room-name-field create-room-form">
+                    <label for="room-name-input">Room name (optional)</label>
+                    <input type="text" id="room-name-input" placeholder="Room name (optional)" autocomplete="off">
+                </div>
+                <button id="scoreboard-btn" class="secondary-btn">View Scoreboard</button>
+            </div>
+
+            <div class="lobby-grid">
+                <section class="lobby-users-panel">
+                    <h2>Online Players</h2>
+                    <div id="lobby-users" class="users-list"></div>
+                </section>
+
+                <section class="rooms-section">
+                    <h2>Active Rooms</h2>
+                    <div id="rooms-list" class="rooms-list"></div>
+                </section>
+
+                <section class="lobby-chat-panel">
+                    <h2>Lobby Chat</h2>
+                    <div id="lobby-chat-list" class="chat-list"></div>
+                    <form id="lobby-chat-form" class="chat-form">
+                        <input type="text" id="lobby-chat-input" placeholder="Say something..." autocomplete="off" required>
+                        <button type="submit">Send</button>
+                    </form>
+                </section>
+            </div>
         </div>
-        <div class="rows" id="third-row">
-            <div class="cells" id="6"></div>
-            <div class="cells" id="7"></div>
-            <div class="cells" id="8"></div>
+    </div>
+
+    <!-- Game View -->
+    <div id="game-container" class="view">
+        <div class="container">
+            <div id="room-info" class="room-info"></div>
+            <div id="room-game-type" class="room-game-type"></div>
+            <div id="game-mode-message" class="game-mode-message"></div>
+            
+            <div class="go-home" style="display: none;">
+                <div class="go-home-text">Play Again</div>
+            </div>    
+            
+            <div class="info">
+                <div class="class-text"></div>
+            </div>
+            
+            <div class="game-board" id="tic-tac-toe-board"></div>
+            <div id="rps-stage" class="rps-stage hidden">
+                <div class="rps-selection" id="rps-selection">
+                    <button type="button" class="rps-btn" data-choice="rock">
+                        <span class="rps-emoji">🪨</span>
+                        <span>Rock</span>
+                    </button>
+                    <button type="button" class="rps-btn" data-choice="paper">
+                        <span class="rps-emoji">📄</span>
+                        <span>Paper</span>
+                    </button>
+                    <button type="button" class="rps-btn" data-choice="scissors">
+                        <span class="rps-emoji">✂️</span>
+                        <span>Scissors</span>
+                    </button>
+                </div>
+                <div class="rps-versus">
+                    <div class="rps-spot player">
+                        <div class="rps-icon" id="rps-player-choice">?</div>
+                        <div class="rps-label">You</div>
+                    </div>
+                    <div class="rps-vs-text">VS</div>
+                    <div class="rps-spot opponent">
+                        <div class="rps-icon" id="rps-opponent-choice">?</div>
+                        <div class="rps-label">Opponent</div>
+                    </div>
+                </div>
+                <div class="rps-result" id="rps-result">Select an option to begin.</div>
+            </div>
+            <div id="rps-controls" class="rps-controls hidden">
+                <button type="button" class="rps-btn" data-choice="rock">🪨 Rock</button>
+                <button type="button" class="rps-btn" data-choice="paper">📄 Paper</button>
+                <button type="button" class="rps-btn" data-choice="scissors">✂️ Scissors</button>
+            </div>
+            <div id="rps-result" class="rps-result"></div>
+            <div id="memory-stage" class="memory-stage hidden">
+                <div class="memory-grid" id="memory-grid"></div>
+                <div id="memory-status" class="memory-status">Flip two cards to find a match.</div>
+            </div>
+            <div class="room-chat-panel">
+                <h3>Room Chat</h3>
+                <div id="room-chat-list" class="chat-list"></div>
+                <form id="room-chat-form" class="chat-form">
+                    <input type="text" id="room-chat-input" placeholder="Message the room..." autocomplete="off" required>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoreboard View -->
+    <div id="scoreboard-container" class="view">
+        <div class="container">
+            <h1>Scoreboard</h1>
+            <button id="back-to-lobby-btn" class="back-btn">Back to Lobby</button>
+            <div id="scoreboard-list" class="scoreboard-list"></div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="game.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

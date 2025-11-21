@@ -1,0 +1,32 @@
+{
+  "1": {
+    "wins": 0,
+    "losses": 1,
+    "draws": 0
+  },
+  "kasman": {
+    "wins": 5,
+    "losses": 6,
+    "draws": 0
+  },
+  "maya": {
+    "wins": 2,
+    "losses": 2,
+    "draws": 0
+  },
+  "as": {
+    "wins": 1,
+    "losses": 0,
+    "draws": 0
+  },
+  "Kutay": {
+    "wins": 6,
+    "losses": 6,
+    "draws": 0
+  },
+  "yueqi": {
+    "wins": 4,
+    "losses": 3,
+    "draws": 0
+  }
+}

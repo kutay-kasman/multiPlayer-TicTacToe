@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard - Multiplayer Tic Tac Toe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .scoreboard-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .back-home-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: Pacifico, cursive;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-home-btn:hover {
+            background-color: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-home-btn">← Back to Game</a>
+    
+    <div class="scoreboard-page">
+        <div class="header">
+            <h1>🏆 Scoreboard</h1>
+            <p>Top players and their statistics</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading scoreboard...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            Failed to load scoreboard. Please try again later.
+        </div>
+        
+        <div id="scoreboard-list" class="scoreboard-list" style="display: none;"></div>
+    </div>
+
+    <script>
+        class ScoreboardPage {
+            constructor() {
+                this.loadScoreboard();
+            }
+
+        async loadScoreboard() {
+            const token = localStorage.getItem('tictactoe_token');
+            if (!token) {
+                this.showLoginRequired();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/scoreboard', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch scoreboard');
+                }
+
+                const data = await response.json();
+                this.displayScoreboard(data);
+            } catch (error) {
+                console.error('Error loading scoreboard:', error);
+                this.showError();
+            }
+        }
+
+            displayScoreboard(data) {
+                const loading = document.getElementById('loading');
+                const scoreboardList = document.getElementById('scoreboard-list');
+                
+                loading.style.display = 'none';
+                scoreboardList.style.display = 'flex';
+                scoreboardList.innerHTML = '';
+
+                if (data.length === 0) {
+                    scoreboardList.innerHTML = '<div class="no-scores">No games played yet! Be the first to play!</div>';
+                    return;
+                }
+
+                data.forEach((player, index) => {
+                    const playerElement = document.createElement('div');
+                    playerElement.className = 'scoreboard-item';
+                    
+                    const rank = index + 1;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+
+                    playerElement.innerHTML = `
+                        <div class="rank">${medal}</div>
+                        <div class="player-info">
+                            <h3>${player.username}</h3>
+                            <p>Games: ${player.totalGames} | Win Rate: ${player.winRate}%</p>
+                        </div>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="stat-label">Wins</span>
+                                <span class="stat-value wins">${player.wins}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Losses</span>
+                                <span class="stat-value losses">${player.losses}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Draws</span>
+                                <span class="stat-value draws">${player.draws}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    scoreboardList.appendChild(playerElement);
+                });
+            }
+
+            showError() {
+                const loading = document.getElementById('loading');
+                const error = document.getElementById('error');
+                
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+
+        showLoginRequired() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            loading.style.display = 'none';
+            error.textContent = 'Please log in to view the scoreboard.';
+            error.style.display = 'block';
+        }
+        }
+
+        // Initialize scoreboard page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new ScoreboardPage();
+        });
+    </script>
+</body>
+</html>
+
+
